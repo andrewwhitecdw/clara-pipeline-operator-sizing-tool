@@ -247,6 +247,15 @@ def print_operator_summary(metrics, op_name):
     """
     logging.info("{:_^60}".format(f"Operator {op_name} Summary"))
     # Calculate metrics for CPU and memory
+    if not metrics:
+        logging.warning(f"No metrics collected for operator {op_name}; summary will be empty.")
+        data = [["CPU", "N/A", "N/A", "cpu: N/A"], [
+            "Memory", "N/A", "N/A", "memory: N/A"]]
+        logging.info(
+            tabulate(
+                data, ["Metric", "Average", "Maximum", "Resource"],
+                tablefmt="pretty"))
+        return data
     cpu_data = [metric.cpu_percent for metric in metrics]
     cpu_avg = round(sum(cpu_data)/len(metrics), 3)
     cpu_max = round(max(cpu_data), 3)

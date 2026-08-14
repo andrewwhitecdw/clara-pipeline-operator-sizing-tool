@@ -15,7 +15,7 @@
 
 from dataclasses import dataclass
 from dataclasses import fields as data_fields
-from datetime import datetime
+from datetime import datetime, timezone
 
 import psutil
 from constants import B_MB_FACTOR, NS_PER_S, ONLINE_CPUS, SYSFS_PATH
@@ -96,7 +96,7 @@ class Container:
         Returns:
             A RawMetrics object
         """
-        timestamp = datetime.utcnow().timestamp()
+        timestamp = datetime.now(timezone.utc).timestamp()
         # Rationale for raw_sys_cpu arithmetic: getSystemCPUUsage() in docker/daemon/stats_collector_unix.go
         # in https://github.com/rancher/docker
         raw_sys_cpu = sum(psutil.cpu_times()[:7])  # in seconds

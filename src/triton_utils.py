@@ -208,12 +208,14 @@ def run_triton_model_repo(execution_order, models_dir):
     Yields:
         ip_address
     """
+    triton_container_id = None
     try:
         triton_models_names = check_models_directory(execution_order, models_dir)
         command = ["tritonserver", "--model-repository=/models", "--model-control-mode=explicit"]
         triton_container_id, ip_address = start_triton(models_dir, command, triton_models_names=triton_models_names)
         yield ip_address
     finally:
-        logging.debug("Stopping Triton ...")
-        subproc_run_wrapper(["docker", "kill", triton_container_id])
-        logging.debug("Finished cleaning up Triton")
+        if triton_container_id is not None:
+            logging.debug("Stopping Triton ...")
+            subproc_run_wrapper(["docker", "kill", triton_container_id])
+            logging.debug("Finished cleaning up Triton")

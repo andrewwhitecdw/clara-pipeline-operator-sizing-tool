@@ -220,3 +220,21 @@ def test_run_triton_model_repo(mock_start_triton, mock_check_dir, mock_subproc_r
 
     mock_subproc_run_wrapper.assert_called_once()
     assert "container_id" in mock_subproc_run_wrapper.call_args_list[0].args[0]
+
+
+@patch("triton_utils.subproc_run_wrapper")
+@patch("triton_utils.start_triton")
+@patch("triton_utils.check_models_directory")
+def test_run_triton_model_repo_no_unbound_cleanup(mock_check_dir, mock_start_triton, mock_subproc_run_wrapper):
+    """If model-directory validation fails before Triton starts, the context
+    manager must raise the original SystemExit instead of masking it with an
+    UnboundLocalError while trying to kill a container that was never started.
+    """
+    mock_check_dir.side_effect = SystemExit("Model directory must be provided")
+
+    with pytest.raises(SystemExit, match="Model directory must be provided"):
+        with run_triton_model_repo([], None):
+            pass  # pragma: no cover
+
+    mock_start_triton.assert_not_called()
+    mock_subproc_run_wrapper.assert_not_called()
